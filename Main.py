@@ -3,7 +3,7 @@ import jinja2
 from google.appengine.api import users
 from google.appengine.ext import ndb
 import os
-from UserDB import User_DB
+from UserDB import UserDB
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -18,10 +18,10 @@ class Main(webapp2.RequestHandler):
         if userLoggedIn:
             loginLink = users.create_logout_url(self.request.uri)
             loginStatus = 'Logout'
-            user_Key_Fetch = ndb.Key('User_DB', userLoggedIn.user_id())
+            user_Key_Fetch = ndb.Key('UserDB', userLoggedIn.user_id())
             user_Key = user_Key_Fetch.get()
             if user_Key == None:
-                user_Key = User_DB(id=userLoggedIn.user_id())
+                user_Key = UserDB(id=userLoggedIn.user_id())
                 user_Key.user_Email = userLoggedIn.email()
                 user_Key.put()
         else:
