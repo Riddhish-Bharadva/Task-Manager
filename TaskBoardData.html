@@ -1,0 +1,161 @@
+<html>
+  <head>
+    <title>Cloud Computing</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <script>
+      function Check()
+      {
+        Value = document.getElementById("Select_Email_From_DB").value;
+        if(Value != "None")
+        {
+          return true;
+        }
+        alert("Please select user email from list to invite user.");
+        return false;
+      }
+      function EmailMatch()
+      {
+        {% if userLoggedIn %}
+          var LoggedInEmail = "{{ userLoggedIn.email() }}";
+        {% endif %}
+        var EmailValue = document.getElementById("UserEmailFromTB").value;
+        if(EmailValue == LoggedInEmail)
+        {
+          alert("Email Id entered cannot be same as that already loggedin. Please enter different user email to invite user.");
+          return false;
+        }
+        return true;
+      }
+    </script>
+  </head>
+  <style>
+    .MainPageBody
+    {
+      width:80%;
+    }
+    .ButtonBeforeLogin
+    {
+       max-width:500px;
+       justify-content:center;
+       border-radius:10px;
+       margin-top:15%;
+    }
+    .LoginButton
+    {
+      color:black;
+      font-size:75px;
+      background:#BDBEB8;
+      border-radius:10px;
+      justify-content: center;
+    }
+    .navbar
+    {
+      margin-top:1%;
+      border-radius: 10px;
+      color:white;
+    }
+  </style>
+  <body>
+    <center>
+      <div class="MainPageBody">
+        {% if userLoggedIn %}
+          <nav class="navbar navbar-inverse">
+            <div class="container-fluid">
+              <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                  <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/">Cloud Computing Assignment 2</a>
+              </div>
+              <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav">
+                  <li><a href="/" data-toggle="modal">Home</a></li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                  <li><a href="{{ loginLink }}"><span class="glyphicon glyphicon-log-in"></span> {{ loginStatus }}</a></li>
+                </ul>
+              </div>
+            </div>
+          </nav>
+          <div style="border-top:1px solid black;margin-top:10px;padding:0px;padding-bottom:10px;"></div>
+          <marquee>
+            You have logged in using email id : {{ userLoggedIn.email() }}
+          </marquee>
+          <div style="border-top:1px solid black;margin-top:10px;padding:0px;padding-bottom:10px;"></div>
+          <div class="row">
+            <div class="col-sm-5">
+              <div style="font-size:15px;">
+                Task Board Name : <b>{{ TBData.TBName }}</b>
+              </div>
+            </div>
+            <div class="col-sm-5">
+              <div style="font-size:15px;">
+                Admin of this Task Board is : <b>{{ TBData.Admin_Email }}</b>
+              </div>
+            </div>
+            <div class="col-sm-2">
+              <div style="font-size:15px;">
+                Edit Delete
+              </div>
+            </div>
+          </div>
+          <div class="row"><div class="col-sm-12"><br><br></div></div>
+          <form method='post' action='/TaskBoardData?id={{ TBData.Admin_Email }}{{ TBData.TBName }}'>
+            <div class="row">
+              <div class="col-sm-5">
+                You can invite user by selecting available users from database :
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <select class="form-control" name="Select_Email_From_DB" id="Select_Email_From_DB">
+                    <option value="None">Select from list</option>
+                    {% for i in AllUser_Email %}
+                      {% if i.user_Email != userLoggedIn.email() %}
+                        <option value="{{ i.user_Email }}">{{ i.user_Email }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <input class='btn btn-default' type='submit' name='SubmitButton' id='SelectBoxSubmit' onClick="return Check();" Value='Invite From DB'>
+                <input class='btn btn-default' type='reset' Value='Reset'>
+              </div>
+            </div>
+          </form>
+          <div class="row">
+            <div class="col-sm-12">
+              <div style="font-size:15px;">
+                =============== OR ===============
+              </div>
+              <br>
+            </div>
+          </div>
+          <form method='post' action='/TaskBoardData?id={{ TBData.Admin_Email }}{{ TBData.TBName }}' name='form'>
+            <div class="row">
+              <div class="col-sm-5">
+                You can invite user by entering user's email id here :
+              </div>
+              <div class="col-sm-4">
+                <input type='email' name='UserEmailFromTB' id='UserEmailFromTB' class='form-control' placeholder='Enter Email Id' /required>
+              </div>
+              <div class="col-sm-3">
+                <input class='btn btn-default' type='submit' name='SubmitButton' id='TextBoxSubmit' onClick="return EmailMatch();" Value='Invite By Email'>
+                <input class='btn btn-default' type='reset' Value='Reset'>
+              </div>
+            </div>
+          </form>
+          <div style="border-top:1px solid black;margin-top:10px;padding:0px;padding-bottom:10px;"></div>
+        {% else %}
+          <ul class="nav ButtonBeforeLogin">
+            <li><a href="{{ loginLink }}" class="LoginButton"><span class="glyphicon glyphicon-log-in"></span> {{ loginStatus }}</a></li>
+          </ul>
+        {% endif %}
+      </div>
+    </center>
+  </body>
+</html>

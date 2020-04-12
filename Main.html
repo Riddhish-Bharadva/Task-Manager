@@ -61,7 +61,7 @@
             You have logged in using email id : {{ userLoggedIn.email() }}
           </marquee>
           <div style="border-top:1px solid black;margin-top:10px;padding:0px;padding-bottom:10px;"></div>
-          <div style="font-size:20px;">
+          <div style="font-size:15px;">
             You will be able to view already added task boards below. Click on each to view tasks (if any) inside each task board.
           </div>
           <div class="row">
@@ -72,12 +72,12 @@
             <div class="col-sm-2"></div>
           </div>
           <br>
-          {% if TaskBoards %}
-            {% for i in TaskBoards %}
+          {% if user_TaskBoards %}
+            {% for i in user_TaskBoards %}
             <div class="row">
               <div class="col-sm-12">
                 <center>
-                  <a href="" name="taskBoardLink" id="taskBoardLink">
+                  <a href="/TaskBoardData?id={{ i.Admin_Email }}{{ i.TBName }}" name="taskBoardLink" id="taskBoardLink">
                     {{ i.TBName }}
                   </a>
                 </center>
