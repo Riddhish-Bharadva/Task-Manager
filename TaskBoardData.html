@@ -15,19 +15,6 @@
         alert("Please select user email from list to invite user.");
         return false;
       }
-      function EmailMatch()
-      {
-        {% if userLoggedIn %}
-          var LoggedInEmail = "{{ userLoggedIn.email() }}";
-        {% endif %}
-        var EmailValue = document.getElementById("UserEmailFromTB").value;
-        if(EmailValue == LoggedInEmail)
-        {
-          alert("Email Id entered cannot be same as that already loggedin. Please enter different user email to invite user.");
-          return false;
-        }
-        return true;
-      }
     </script>
   </head>
   <style>
@@ -122,29 +109,7 @@
                 </div>
               </div>
               <div class="col-sm-3">
-                <input class='btn btn-default' type='submit' name='SubmitButton' id='SelectBoxSubmit' onClick="return Check();" Value='Invite From DB'>
-                <input class='btn btn-default' type='reset' Value='Reset'>
-              </div>
-            </div>
-          </form>
-          <div class="row">
-            <div class="col-sm-12">
-              <div style="font-size:15px;">
-                =============== OR ===============
-              </div>
-              <br>
-            </div>
-          </div>
-          <form method='post' action='/TaskBoardData?id={{ TBData.Admin_Email }}{{ TBData.TBName }}' name='form'>
-            <div class="row">
-              <div class="col-sm-5">
-                You can invite user by entering user's email id here :
-              </div>
-              <div class="col-sm-4">
-                <input type='email' name='UserEmailFromTB' id='UserEmailFromTB' class='form-control' placeholder='Enter Email Id' /required>
-              </div>
-              <div class="col-sm-3">
-                <input class='btn btn-default' type='submit' name='SubmitButton' id='TextBoxSubmit' onClick="return EmailMatch();" Value='Invite By Email'>
+                <input class='btn btn-default' type='submit' name='SubmitButton' id='SelectBoxSubmit' onClick="return Check();" Value='Invite'>
                 <input class='btn btn-default' type='reset' Value='Reset'>
               </div>
             </div>

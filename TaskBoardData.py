@@ -54,36 +54,29 @@ class TaskBoardData(webapp2.RequestHandler):
         userLoggedIn = users.get_current_user()
         TaskBoard_ID = self.request.get('id')
 
-        if self.request.get('SubmitButton') == 'Invite From DB':
-            UserEmailFromSelectBox = self.request.get('Select_Email_From_DB')
-            self.InviteUser(UserEmailFromSelectBox,TaskBoard_ID)
-        elif self.request.get('SubmitButton') == 'Invite By Email':
-            UserEmailFromTextBox = self.request.get('UserEmailFromTB')
-            self.InviteUser(UserEmailFromTextBox,TaskBoard_ID)
+        if self.request.get('SubmitButton') == 'Invite':
+            FetchUserEmail = self.request.get('Select_Email_From_DB')
+            user_DB_Data = UserDB.query(UserDB.user_Email == FetchUserEmail).get()
+            user_DB_TB = user_DB_Data.TB_Key
+            Match_Found = 0
+            for i in user_DB_TB:
+                if i == TaskBoard_ID:
+                    Match_Found = 1
+                    break
+                else:
+                    Match_Found = 0
+            if Match_Found == 0:
+                user_DB_Data.TB_Key.append(TaskBoard_ID)
+                user_DB_Data.put()
+                TB_DB_Data = ndb.Key('TaskBoardDB',TaskBoard_ID)
+                TB_DB_Data = TB_DB_Data.get()
+                TB_DB_Data.Users_Email.append(FetchUserEmail)
+                TB_DB_Data.put()
+                self.redirect('/TaskBoardData?id='+TaskBoard_ID)
+            else:
+                self.redirect('/TaskBoardData?id='+TaskBoard_ID)
         else:
             self.redirect('/')
-
-    def InviteUser(self, FetchUserEmail, TaskBoard_ID):
-        user_Fetch = UserDB.query(UserDB.user_Email == FetchUserEmail)
-        user_DB_Data = user_Fetch.get()
-        user_DB_TB = user_DB_Data.TB_Key
-        Match_Found = 0
-        for i in user_DB_TB:
-            if i == TaskBoard_ID:
-                Match_Found = 1
-                break
-            else:
-                Match_Found = 0
-        if Match_Found == 0:
-            user_DB_Data.TB_Key.append(TaskBoard_ID)
-            user_DB_Data.put()
-            TB_DB_Data = ndb.Key('TaskBoardDB',TaskBoard_ID)
-            TB_DB_Data = TB_DB_Data.get()
-            TB_DB_Data.Users_Email.append(FetchUserEmail)
-            TB_DB_Data.put()
-            self.redirect('/TaskBoardData?id='+TaskBoard_ID)
-        else:
-            self.redirect('/TaskBoardData?id='+TaskBoard_ID)
 
 app = webapp2.WSGIApplication([
     ('/TaskBoardData',TaskBoardData),
