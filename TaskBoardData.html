@@ -5,15 +5,43 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
     <script>
-      function Check()
+      function InviteUserCheck()
       {
-        Value = document.getElementById("Select_Email_From_DB").value;
+        Value = document.getElementById("SelectToInviteUser").value;
         if(Value != "None")
         {
           return true;
         }
-        alert("Please select user email from list to invite user.");
+        alert("Please select user email from list.");
         return false;
+      }
+      function RemoveUserCheck()
+      {
+        Value = document.getElementById("SelectToRemoveUser").value;
+        if(Value != "None")
+        {
+          return true;
+        }
+        alert("Please select user email from list.");
+        return false;
+      }
+      function AssignUserCheck()
+      {
+        Value = document.getElementById("SelectToAssignUser").value;
+        if(Value != "None")
+        {
+          return true;
+        }
+        alert("Please select user email from list.");
+        return false;
+      }
+      function onCheckBoxClick(StatusValue)
+      {
+        document.getElementById("TastCompleteStatusTextBox").value = StatusValue;
+      }
+      function onAssignUserButtonClick(TaskTitleValue)
+      {
+        document.getElementById("TaskTitleTextBox").value = TaskTitleValue;
       }
     </script>
   </head>
@@ -73,46 +101,168 @@
             You have logged in using email id : {{ userLoggedIn.email() }}
           </marquee>
           <div style="border-top:1px solid black;margin-top:10px;padding:0px;padding-bottom:10px;"></div>
-          <div class="row">
-            <div class="col-sm-5">
-              <div style="font-size:15px;">
-                Task Board Name : <b>{{ TBData.TBName }}</b>
-              </div>
+          {% if notification == 'UserInvited' %}
+            <div style='background:Green;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              User invited successfully.
             </div>
-            <div class="col-sm-5">
-              <div style="font-size:15px;">
-                Admin of this Task Board is : <b>{{ TBData.Admin_Email }}</b>
-              </div>
+          {% elif notification == 'UserAlreadyExist' %}
+            <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              User already have access to this task board.
             </div>
-            <div class="col-sm-2">
-              <div style="font-size:15px;">
-                Edit Delete
-              </div>
+          {% elif notification == 'CreateTaskSuccessful' %}
+            <div style='background:Green;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              Task Created Successfully.
             </div>
-          </div>
-          <div class="row"><div class="col-sm-12"><br><br></div></div>
+          {% elif notification == 'CreateTaskFailed' %}
+            <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              Failed to create new task.
+            </div>
+          {% elif notification == 'TaskCompleteStatusChangedToComplete' %}
+            <div style='background:Green;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              Task marked as complete.
+            </div>
+          {% elif notification == 'TaskCompleteStatusChangedToNotComplete' %}
+            <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              Task marked as not complete.
+            </div>
+          {% elif notification == 'TaskCompleteStatusNotChanged' %}
+            <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              Task completion status not changed.
+            </div>
+          {% elif notification == 'No Notification' %}
+            <div style='background:Yellow;padding:10px;font-size:15px;border-radius:5px;'>
+              Notifications for any operations performed will be displayed here.
+            </div>
+          {% endif %}
+          <div style="border-top:1px solid black;margin-top:10px;padding:0px;padding-bottom:10px;"></div>
           <form method='post' action='/TaskBoardData?id={{ TBData.Admin_Email }}{{ TBData.TBName }}'>
             <div class="row">
               <div class="col-sm-5">
+                <div style="font-size:15px;">
+                  Task Board Name : {{ TBData.TBName }}
+                </div>
+              </div>
+              <div class="col-sm-5">
+                <div style="font-size:15px;">
+                  Admin of this Task Board is : <b>{{ TBData.Admin_Email }}</b>
+                </div>
+              </div>
+              <div class="col-sm-2">
+                <div style="font-size:15px;">
+                  <input class='btn btn-default' type='submit' name='SubmitButton' id='EditButton' value='Edit'>
+                  <input class='btn btn-default' type='submit' name='SubmitButton' id='DeleteButton' value='Delete'>
+                </div>
+              </div>
+            </div>
+            <div class="row"><div class="col-sm-12"><br></div></div>
+            <div class="row">
+              <div class="col-sm-5">
                 You can invite user by selecting available users from database :
+                <br>
+                <b>(Note : You cannot invite yourself and Admin of this taskboard)</b>
               </div>
               <div class="col-sm-4">
                 <div class="form-group">
-                  <select class="form-control" name="Select_Email_From_DB" id="Select_Email_From_DB">
-                    <option value="None">Select from list</option>
+                  <select class="form-control" name="SelectToInviteUser" id="SelectToInviteUser">
+                    <option value="None">Select User</option>
                     {% for i in AllUser_Email %}
                       {% if i.user_Email != userLoggedIn.email() %}
-                        <option value="{{ i.user_Email }}">{{ i.user_Email }}</option>
+                        {% if i.user_Email != TBData.Admin_Email %}
+                          <option value="{{ i.user_Email }}">{{ i.user_Email }}</option>
+                        {% endif %}
                       {% endif %}
                     {% endfor %}
                   </select>
                 </div>
               </div>
               <div class="col-sm-3">
-                <input class='btn btn-default' type='submit' name='SubmitButton' id='SelectBoxSubmit' onClick="return Check();" Value='Invite'>
-                <input class='btn btn-default' type='reset' Value='Reset'>
+                <input class='btn btn-default' type='submit' name='SubmitButton' id='InviteUser' onClick="return InviteUserCheck();" value='Invite'>
+                <input class='btn btn-default' type='reset' value='Reset'>
               </div>
             </div>
+            <div class="row">
+              <div class="col-sm-5">
+                You can remove user from assigned users to this task board :
+                <br>
+                <b>(Note : You cannot remove Admin of this taskboard)</b>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <select class="form-control" name="SelectToRemoveUser" id="SelectToRemoveUser">
+                    <option value="None">Select user</option>
+                    {% for i in TBData.Users_Email %}
+                      {% if i != TBData.Admin_Email %}
+                        <option value="{{ i.user_Email }}">{{ i }}</option>
+                      {% endif %}
+                    {% endfor %}
+                  </select>
+                </div>
+              </div>
+              <div class="col-sm-3">
+                <input class='btn btn-default' type='submit' name='SubmitButton' id='RemoveUser' onClick="return RemoveUserCheck();" value='Remove'>
+                <input class='btn btn-default' type='reset' value='Reset'>
+              </div>
+            </div>
+            <div class="row"><div class="col-sm-12"><div style="border-top:1px solid black;margin-top:10px;padding:0px;padding-bottom:10px;"></div></div></div>
+            <div class="row">
+              <div class="col-sm-2"></div>
+              <div class="col-sm-6">
+                <b>
+                  You can view created tasks (if any) in this section. Click on Task Title to edit or delete task.
+                </b>
+              </div>
+              <div class="col-sm-2">
+                <a class='btn btn-default' data-toggle="modal" data-target="#NewTaskModal">Create Task</a>
+              </div>
+              <div class="col-sm-2"></div>
+            </div>
+            <div class="row"><div class="col-sm-12"><div style="border-top:1px solid black;margin-top:10px;padding:0px;padding-bottom:10px;"></div></div></div>
+            {% if TBData.TaskConnect %}
+              <div class="row">
+                <b>
+                  <div class="col-sm-2">Task Title</div>
+                  <div class="col-sm-2">Due Date</div>
+                  <div class="col-sm-3">Assigned User</div>
+                  <div class="col-sm-1">Completion Status</div>
+                  <div class="col-sm-2">Completion Date</div>
+                  <div class="col-sm-2">Completion Time</div>
+                </b>
+              </div>
+              <div class="row"><div class="col-sm-12"><br></div></div>
+              {% for i in range(0,TaskCount) %}
+                <div class="row">
+                  <div class="col-sm-2">
+                    {{ TBData.TaskConnect.TaskTitle[i] }}
+                  </div>
+                  <div class="col-sm-2">
+                    {{ TBData.TaskConnect.TaskDueDate[i] }}
+                  </div>
+                  <div class="col-sm-3">
+                    {% if TBData.TaskConnect.TaskAssignedUser[i] == "Not Assigned" %}
+                      <button type="button" class="btn btn-default" value="{{ TBData.TaskConnect.TaskTitle[i] }}" onclick="onAssignUserButtonClick(this.value);" data-toggle="modal" data-target="#TaskAssignUserModal">Click to Assign</button>
+                    {% else %}
+                      {{ TBData.TaskConnect.TaskAssignedUser[i] }}
+                    {% endif %}
+                  </div>
+                  <div class="col-sm-1">
+                    {% if TBData.TaskConnect.TaskCompleteStatus[i] == 0 %}
+                      <input type="checkbox" name="TaskCompleteStatus" id="TaskCompleteStatus" value='{{ TBData.TaskConnect.TaskTitle[i] }}' onclick="onCheckBoxClick(this.value);" data-toggle="modal" data-target="#ChangeTaskStatusModal">
+                    {% else %}
+                      <input type="checkbox" name="TaskCompleteStatus" id="TaskCompleteStatus" value='{{ TBData.TaskConnect.TaskTitle[i] }}' onclick="onCheckBoxClick(this.value);" data-toggle="modal" data-target="#ChangeTaskStatusModal" checked>
+                    {% endif %}
+                  </div>
+                  <div class="col-sm-2">
+                    {{ TBData.TaskConnect.TaskCompleteDate[i] }}
+                  </div>
+                  <div class="col-sm-2">
+                    {{ TBData.TaskConnect.TaskCompleteTime[i] }}
+                  </div>
+                </div>
+                <div class="row"><div class="col-sm-12"><br></div></div>
+              {% endfor %}
+            {% else %}
+              No tasks created yet. please create a task to view here.
+            {% endif %}
           </form>
           <div style="border-top:1px solid black;margin-top:10px;padding:0px;padding-bottom:10px;"></div>
         {% else %}
@@ -122,5 +272,148 @@
         {% endif %}
       </div>
     </center>
+
+    <!-- Create Task Modal Code Starts Here -->
+          <div name="NewTaskModal" id="NewTaskModal" style="margin-top:10%;" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <button type="button" class="close" data-dismiss="modal">&times;</button>
+                  <h4 class="modal-title">Create new task</h4>
+                </div>
+                <div class="modal-body">
+                  <form action="/TaskBoardData?id={{ TBData.Admin_Email }}{{ TBData.TBName }}" method="post">
+                    <center>
+                      <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-6">
+                          <input type='textbox' class="form-control" name='NewTaskTitle' id='NewTaskTitle' placeholder="Enter new task title" /required>
+                        </div>
+                        <div class="col-sm-3"></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-12"><br></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-6">
+                          <input type='date' class="form-control" name='TaskDueDate' id='TaskDueDate' /required>
+                        </div>
+                        <div class="col-sm-3"></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-12"><br></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-3"></div>
+                        <div class="col-sm-6">
+                          <input type='submit' class="btn btn-default" name='SubmitButton' id='CreateTaskButton' value='Create Task'>
+                          <input type="reset" class="btn btn-default" value="Reset">
+                        </div>
+                        <div class="col-sm-3"></div>
+                      </div>
+                    </center>
+                  </form>
+                </div>
+              </div>
+            </div>
+          </div>
+    <!-- Create Task Modal Code Ends Here -->
+
+    <!-- Change Task Status Modal Code Starts Here -->
+          <div name="ChangeTaskStatusModal" id="ChangeTaskStatusModal" style="margin-top:10%;" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <a class="close" href="/TaskBoardData?id={{ TBData.Admin_Email }}{{ TBData.TBName }}">&times;</a>
+                  <h4 class="modal-title">Are you sure you want to change task completion status of below task?</h4>
+                </div>
+                <div class="modal-body">
+                  <center>
+                    <form action="/TaskBoardData?id={{ TBData.Admin_Email }}{{ TBData.TBName }}" method="post">
+                      <div class="row">
+                        <div class="col-sm-12"><br></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-3"><br></div>
+                        <div class="col-sm-6">
+                          <input type="textbox" class="form-control" name='TastCompleteStatusTextBox' id='TastCompleteStatusTextBox' onkeydown="return false;">
+                        </div>
+                        <div class="col-sm-3"><br></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-12"><br></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-8">
+                          <input type='submit' class="btn btn-default" name='SubmitButton' id='ChangeTaskStatusButton' value='Yes'>
+                          <a class="btn btn-default" href="/TaskBoardData?id={{ TBData.Admin_Email }}{{ TBData.TBName }}">No</a>
+                        </div>
+                        <div class="col-sm-2"></div>
+                      </div>
+                    </form>
+                  </center>
+                </div>
+              </div>
+            </div>
+          </div>
+    <!-- Change Task Status Modal Code Ends Here -->
+
+    <!-- Assign User To Task Modal Code Starts Here -->
+          <div name="TaskAssignUserModal" id="TaskAssignUserModal" style="margin-top:10%;" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <a class="close" href="/TaskBoardData?id={{ TBData.Admin_Email }}{{ TBData.TBName }}">&times;</a>
+                  <h4 class="modal-title">Select user to assign to task</h4>
+                </div>
+                <div class="modal-body">
+                  <center>
+                    <form action="/TaskBoardData?id={{ TBData.Admin_Email }}{{ TBData.TBName }}" method="post">
+                      <div class="row">
+                        <div class="col-sm-12"><br></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-3"><br></div>
+                        <div class="col-sm-6">
+                          <input type="textbox" class="form-control" name='TaskTitleTextBox' id='TaskTitleTextBox' onkeydown="return false;">
+                        </div>
+                        <div class="col-sm-3"><br></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-12"><br></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-3"><br></div>
+                        <div class="col-sm-6">
+                          <select class="form-control" name="SelectToAssignUser" id="SelectToAssignUser">
+                            <option value="None">Select User</option>
+                            {% for i in TBData.Users_Email %}
+                              <option value="{{ i }}">{{ i }}</option>
+                            {% endfor %}
+                          </select>
+                        </div>
+                        <div class="col-sm-3"><br></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-12"><br></div>
+                      </div>
+                      <div class="row">
+                        <div class="col-sm-2"></div>
+                        <div class="col-sm-8">
+                          <input type='submit' class="btn btn-default" name='SubmitButton' id='AssignUserButton' value='Assign' onclick="return AssignUserCheck();">
+                          <a class="btn btn-default" href="/TaskBoardData?id={{ TBData.Admin_Email }}{{ TBData.TBName }}">Cancel</a>
+                        </div>
+                        <div class="col-sm-2"></div>
+                      </div>
+                    </form>
+                  </center>
+                </div>
+              </div>
+            </div>
+          </div>
+    <!-- Change Task Status Modal Code Ends Here -->
+
   </body>
 </html>
