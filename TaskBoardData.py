@@ -21,6 +21,7 @@ class TaskBoardData(webapp2.RequestHandler):
         TaskBoard_ID = self.request.get('id')
         TaskCount = 0
         notification = ''
+        EditMode = ''
 
         if userLoggedIn:
             loginLink = users.create_logout_url(self.request.uri)
@@ -39,6 +40,9 @@ class TaskBoardData(webapp2.RequestHandler):
             notification = self.request.get('notification')
             if notification == '':
                 notification = 'No Notification'
+            EditMode = self.request.get('EditMode')
+            if EditMode == '':
+                EditMode = 'Off'
         else:
             loginLink = users.create_login_url(self.request.uri)
             loginStatus = 'Login'
@@ -53,7 +57,8 @@ class TaskBoardData(webapp2.RequestHandler):
             'TBData' : TBData,
             'AllUser_Email' : AllUser_Email,
             'TaskCount' : TaskCount,
-            'notification' : notification
+            'notification' : notification,
+            'EditMode' : EditMode
         }
         template = JINJA_ENVIRONMENT.get_template('TaskBoardData.html')
         self.response.write(template.render(template_values))
@@ -214,31 +219,45 @@ class TaskBoardData(webapp2.RequestHandler):
             else:
                 self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserAlreadyAssignedForThisTask')
 
-# If no condition matches, user will be redirected to home page.
+# Below code handles TaskBoard Delete Functionality.
         elif self.request.get('SubmitButton') == 'Delete':
             User_DB_Data = ndb.Key('UserDB', userLoggedIn.user_id()).get()
             TB_DB_Data = ndb.Key('TaskBoardDB', TaskBoard_ID).get()
-            if TB_DB_Data.TaskConnect == None:
-                if len(TB_DB_Data.Users_Email) == 1:
-                    if TB_DB_Data.Users_Email[0] == userLoggedIn.email():
-                        for i in range(0, len(User_DB_Data.TB_Key)):
-                            if User_DB_Data.TB_Key[i] == TaskBoard_ID:
-                                del TB_DB_Data.TBName
-                                del TB_DB_Data.Admin_Email
-                                del TB_DB_Data.Users_Email
-                                del TB_DB_Data.TaskConnect
-                                TB_DB_Data.put()
-                                del User_DB_Data.TB_Key[i]
-                                User_DB_Data.put()
-                                self.redirect('/')
-                            else:
-                                self.response.write('There was some error while deleting task board.')
+            if TB_DB_Data.Admin_Email == userLoggedIn.email():
+                if TB_DB_Data.TaskConnect == None:
+                    if len(TB_DB_Data.Users_Email) == 1:
+                        if TB_DB_Data.Users_Email[0] == userLoggedIn.email():
+                            for i in range(0, len(User_DB_Data.TB_Key)):
+                                if User_DB_Data.TB_Key[i] == TaskBoard_ID:
+                                    del TB_DB_Data.TBName
+                                    del TB_DB_Data.Admin_Email
+                                    del TB_DB_Data.Users_Email
+                                    del TB_DB_Data.TaskConnect
+                                    TB_DB_Data.put()
+                                    TB_DB_Data.key.delete()
+                                    del User_DB_Data.TB_Key[i]
+                                    User_DB_Data.put()
+                                    self.redirect('/')
+                                else:
+                                    self.response.write('There was some error while deleting task board.')
+                        else:
+                            self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserNotAdmin')
                     else:
-                        self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserNotAdmin')
+                        self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UsersStillAssigned')
                 else:
-                    self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UsersStillAssigned')
+                    self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=TaskStillExist')
             else:
-                self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=TaskStillExist')
+                self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserNotAdmin')
+
+# Below code handles taskboard edit functionality.
+        elif self.request.get('SubmitButton') == 'Edit':
+            EditMode = 'On'
+            self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&EditMode='+EditMode)
+
+# Below Code handles taskboard rename functionality.
+        elif self.request.get('SubmitButton') == 'Update':
+            NewTaskBoardName = self.request.get('NewTaskBoardTitle')
+            
 
 # If no condition matches, user will be redirected to home page.
         else:

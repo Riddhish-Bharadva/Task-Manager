@@ -57,7 +57,9 @@ class Main(webapp2.RequestHandler):
                     Complete_Tasks.append(len(Task_DB_Data.TaskTitle) - ActiveCount)
                 else:
                     Total_Tasks.append(0)
-
+                    Active_Tasks.append(0)
+                    Complete_Tasks.append(0)
+                    Completed_Today.append(0)
         else:
             loginLink = users.create_login_url(self.request.uri)
             loginStatus = 'Login'

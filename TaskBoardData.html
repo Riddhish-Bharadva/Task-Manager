@@ -192,24 +192,57 @@
           {% endif %}
           <div style="border-top:1px solid black;margin-top:10px;padding:0px;padding-bottom:10px;"></div>
           <form method='post' action='/TaskBoardData?id={{ TBData.Admin_Email }}{{ TBData.TBName }}'>
-            <div class="row">
-              <div class="col-sm-5">
-                <div style="font-size:15px;">
-                  Task Board Name : {{ TBData.TBName }}
+            {% if EditMode == "Off" %}
+              <div class="row">
+                <div class="col-sm-5">
+                  <div style="font-size:15px;">
+                    Task Board Name : {{ TBData.TBName }}
+                  </div>
+                </div>
+                <div class="col-sm-2">
+                  <div style="font-size:15px;">
+                    <input class='btn btn-default' type='submit' name='SubmitButton' id='EditButton' value='Edit'>
+                    <input class='btn btn-default' type='submit' name='SubmitButton' id='DeleteButton' value='Delete'>
+                  </div>
+                </div>
+                <div class="col-sm-5">
+                  <div style="font-size:15px;">
+                    Admin of this Task Board is : <b>{{ TBData.Admin_Email }}</b>
+                  </div>
                 </div>
               </div>
-              <div class="col-sm-5">
-                <div style="font-size:15px;">
-                  Admin of this Task Board is : <b>{{ TBData.Admin_Email }}</b>
+            {% elif EditMode == "On" %}
+              <div class="row">
+                <div class="col-sm-5">
+                  <div style="font-size:15px;">
+                    <div class="row">
+                      <div class="col-sm-5">
+                        Task Board New Name :
+                      </div>
+                      <div class="col-sm-7">
+                        <input type='textbox' class='form-control' value='{{ TBData.TBName }}' name='NewTaskBoardTitle' id='NewTaskBoardTitle' /required>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <div style="font-size:15px;">
+                    {% if EditMode == 'Off' %}
+                      <input class='btn btn-default' type='submit' name='SubmitButton' id='EditButton' value='Edit'>
+                    {% else %}
+                      <a href="/TaskBoardData?id={{ TBData.Admin_Email }}{{ TBData.TBName }}" class="btn btn-default">Cancel</a>
+                      <input class='btn btn-default' type='submit' name='SubmitButton' id='UpdateButton' value='Update'>
+                    {% endif %}
+                    <input class='btn btn-default' type='submit' name='SubmitButton' id='DeleteButton' value='Delete'>
+                  </div>
+                </div>
+                <div class="col-sm-4">
+                  <div style="font-size:15px;">
+                    Admin of this Task Board is : <b>{{ TBData.Admin_Email }}</b>
+                  </div>
                 </div>
               </div>
-              <div class="col-sm-2">
-                <div style="font-size:15px;">
-                  <input class='btn btn-default' type='submit' name='SubmitButton' id='EditButton' value='Edit'>
-                  <input class='btn btn-default' type='submit' name='SubmitButton' id='DeleteButton' value='Delete'>
-                </div>
-              </div>
-            </div>
+            {% endif %}
             <div class="row"><div class="col-sm-12"><br></div></div>
             <div class="row">
               <div class="col-sm-5">
@@ -236,6 +269,7 @@
                 <input class='btn btn-default' type='reset' value='Reset'>
               </div>
             </div>
+            {% if EditMode == 'On' %}
             <div class="row">
               <div class="col-sm-5">
                 You can remove user from assigned users to this task board :
@@ -259,6 +293,7 @@
                 <input class='btn btn-default' type='reset' value='Reset'>
               </div>
             </div>
+            {% endif %}
             <div class="row"><div class="col-sm-12"><div style="border-top:1px solid black;margin-top:10px;padding:0px;padding-bottom:10px;"></div></div></div>
             <div class="row">
               <div class="col-sm-2"></div>

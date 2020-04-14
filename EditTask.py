@@ -121,6 +121,7 @@ class EditTask(webapp2.RequestHandler):
                 del Task_DB_Data.TaskCompleteDate[Old_TaskTitle_Position]
                 del Task_DB_Data.TaskCompleteTime[Old_TaskTitle_Position]
                 Task_DB_Data.put()
+                Task_DB_Data.key.delete()
                 del TB_DB_Data.TaskConnect.TaskTitle[Old_TaskTitle_Position]
                 del TB_DB_Data.TaskConnect.TaskDueDate[Old_TaskTitle_Position]
                 del TB_DB_Data.TaskConnect.TaskAssignedUser[Old_TaskTitle_Position]
