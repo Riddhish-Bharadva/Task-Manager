@@ -43,6 +43,10 @@
       {
         document.getElementById("TaskTitleTextBox").value = TaskTitleValue;
       }
+      function onTaskTitleButtonClick(TaskTitleValue)
+      {
+        document.getElementById("TaskTitleTB").value = TaskTitleValue;
+      }
     </script>
   </head>
   <style>
@@ -70,6 +74,10 @@
       margin-top:1%;
       border-radius: 10px;
       color:white;
+    }
+    .taskTitleButton
+    {
+      padding:5px;
     }
   </style>
   <body>
@@ -137,6 +145,34 @@
             <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
               User already exist for this task.
             </div>
+          {% elif notification == 'TaskDataEditedSuccessfully' %}
+            <div style='background:Green;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              Task Data edited successfully.
+            </div>
+          {% elif notification == 'TaskTitleAlreadyExistOtherDataEdited' %}
+            <div style='background:Yellow;padding:10px;font-size:15px;border-radius:5px;'>
+              Task title entered already exist. Task due date and assigned users edited.
+            </div>
+          {% elif notification == 'TaskDeletedSuccessfully' %}
+            <div style='background:Green;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              Task deleted successfully.
+            </div>
+          {% elif notification == 'LastTaskDeletedSuccessfully' %}
+            <div style='background:Green;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              Task deleted successfully. That was last task which you delete.
+            </div>
+          {% elif notification == 'UserRemoved' %}
+            <div style='background:Green;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              User removed successfully from this task board.
+            </div>
+          {% elif notification == 'UserNotExistInTaskBoard' %}
+            <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              User already does not have authorization to this task board.
+            </div>
+          {% elif notification == 'UserNotAdminOfThisTask' %}
+            <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              Only Admin have authorization to add or remove users from this task board.
+            </div>
           {% elif notification == 'No Notification' %}
             <div style='background:Yellow;padding:10px;font-size:15px;border-radius:5px;'>
               Notifications for any operations performed will be displayed here.
@@ -167,7 +203,7 @@
               <div class="col-sm-5">
                 You can invite user by selecting available users from database :
                 <br>
-                <b>(Note : You cannot invite yourself and Admin of this taskboard)</b>
+                <b>(Note : Only Admin of this taskboard can invite users)</b>
               </div>
               <div class="col-sm-4">
                 <div class="form-group">
@@ -192,7 +228,7 @@
               <div class="col-sm-5">
                 You can remove user from assigned users to this task board :
                 <br>
-                <b>(Note : You cannot remove Admin of this taskboard)</b>
+                <b>(Note : Only Admin of this taskboard can remove users)</b>
               </div>
               <div class="col-sm-4">
                 <div class="form-group">
@@ -200,7 +236,7 @@
                     <option value="None">Select user</option>
                     {% for i in TBData.Users_Email %}
                       {% if i != TBData.Admin_Email %}
-                        <option value="{{ i.user_Email }}">{{ i }}</option>
+                        <option value="{{ i }}">{{ i }}</option>
                       {% endif %}
                     {% endfor %}
                   </select>
@@ -244,7 +280,9 @@
                 <div class="row">
                 {% endif %}
                   <div class="col-sm-2">
-                    {{ TBData.TaskConnect.TaskTitle[i] }}
+                    <a class="btn btn-default taskTitleButton" href="/EditTask?id={{ TBData.Admin_Email }}{{ TBData.TBName }}&tasktitle={{ TBData.TaskConnect.TaskTitle[i] }}">
+                      {{ TBData.TaskConnect.TaskTitle[i] }}
+                    </a>
                   </div>
                   <div class="col-sm-2">
                     {{ TBData.TaskConnect.TaskDueDate[i] }}

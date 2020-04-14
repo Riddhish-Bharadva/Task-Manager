@@ -66,26 +66,59 @@ class TaskBoardData(webapp2.RequestHandler):
 
 # Below if condition is to invite user to taskboard.
         if self.request.get('SubmitButton') == 'Invite':
+            TB_DB_Data = ndb.Key('TaskBoardDB',TaskBoard_ID).get()
             FetchUserEmail = self.request.get('SelectToInviteUser')
             user_DB_Data = UserDB.query(UserDB.user_Email == FetchUserEmail).get()
-            user_DB_TB = user_DB_Data.TB_Key
-            Match_Found = 0
-            for i in user_DB_TB:
-                if i == TaskBoard_ID:
-                    Match_Found = 1
-                    break
+            if userLoggedIn.email() == TB_DB_Data.Admin_Email:
+                Match_Found = 0
+                for i in user_DB_Data.TB_Key:
+                    if i == TaskBoard_ID:
+                        Match_Found = 1
+                        break
+                    else:
+                        Match_Found = 0
+                if Match_Found == 0:
+                    user_DB_Data.TB_Key.append(TaskBoard_ID)
+                    user_DB_Data.put()
+                    TB_DB_Data.Users_Email.append(FetchUserEmail)
+                    TB_DB_Data.put()
+                    self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserInvited')
                 else:
-                    Match_Found = 0
-            if Match_Found == 0:
-                user_DB_Data.TB_Key.append(TaskBoard_ID)
-                user_DB_Data.put()
-                TB_DB_Data = ndb.Key('TaskBoardDB',TaskBoard_ID)
-                TB_DB_Data = TB_DB_Data.get()
-                TB_DB_Data.Users_Email.append(FetchUserEmail)
-                TB_DB_Data.put()
-                self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserInvited')
+                    self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserAlreadyExist')
             else:
-                self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserAlreadyExist')
+                self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserNotAdminOfThisTask')
+
+# Below if condition is to remove user from taskboard.
+        elif self.request.get('SubmitButton') == 'Remove':
+            TB_DB_Data = ndb.Key('TaskBoardDB',TaskBoard_ID).get()
+            FetchUserEmail = self.request.get('SelectToRemoveUser')
+            user_DB_Data = UserDB.query(UserDB.user_Email == FetchUserEmail).get()
+            if userLoggedIn.email() == TB_DB_Data.Admin_Email:
+                UDB_Match_Found = 0
+                TB_DB_Match_Found = 0
+                position_UDB = -1
+                position_TB_DB = -1
+                for i in range(0,len(user_DB_Data.TB_Key)):
+                    if user_DB_Data.TB_Key[i] == TaskBoard_ID:
+                        UDB_Match_Found = 1
+                        position_UDB = i
+                        break
+                for j in range(0,len(TB_DB_Data.Users_Email)):
+                    if TB_DB_Data.Users_Email[j] == FetchUserEmail:
+                        TB_DB_Match_Found = 1
+                        position_TB_DB = j
+                        break
+                if UDB_Match_Found == 1:
+                    del user_DB_Data.TB_Key[position_UDB]
+                    user_DB_Data.put()
+                    if TB_DB_Match_Found == 1:
+                        del TB_DB_Data.Users_Email[position_TB_DB]
+                        TB_DB_Data.put()
+                        self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserRemoved')
+                else:
+                    self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserNotExistInTaskBoard')
+            else:
+                self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserNotAdminOfThisTask')
 
 # Below elif condition is to handle creating a new task.
         elif self.request.get('SubmitButton') == 'Create Task':
@@ -93,6 +126,7 @@ class TaskBoardData(webapp2.RequestHandler):
             TaskDueDate = self.request.get('TaskDueDate')
             TaskDueDate = datetime.strptime(TaskDueDate,'%Y-%m-%d')
             Task_DB_Data = ndb.Key('TaskDB', TaskBoard_ID).get()
+            Match_Found = 0
             if Task_DB_Data != None:
                 Task_Title_List = Task_DB_Data.TaskTitle
                 for i in Task_Title_List:
@@ -172,7 +206,7 @@ class TaskBoardData(webapp2.RequestHandler):
             else:
                 self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserAlreadyAssignedForThisTask')
 
-# In case no condition from above satisfies, below redirects user to home page.
+# If no condition matches, user will be redirected to home page.
         else:
             self.redirect('/')
 

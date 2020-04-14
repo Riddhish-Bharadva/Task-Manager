@@ -7,6 +7,7 @@ from UserDB import UserDB
 from TaskBoardDB import TaskBoardDB
 from TaskDB import TaskDB
 from TaskBoardData import TaskBoardData
+from EditTask import EditTask
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -85,4 +86,5 @@ class Main(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
     ('/', Main),
     ('/TaskBoardData', TaskBoardData),
+    ('/EditTask', EditTask),
 ], debug=True)
