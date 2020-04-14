@@ -129,6 +129,14 @@
             <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
               Task completion status not changed.
             </div>
+          {% elif notification == 'UserAssignedToTaskSuccessfully' %}
+            <div style='background:Green;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              User successfully assigned to task.
+            </div>
+          {% elif notification == 'UserAlreadyAssignedForThisTask' %}
+            <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              User already exist for this task.
+            </div>
           {% elif notification == 'No Notification' %}
             <div style='background:Yellow;padding:10px;font-size:15px;border-radius:5px;'>
               Notifications for any operations performed will be displayed here.
@@ -230,7 +238,11 @@
               </div>
               <div class="row"><div class="col-sm-12"><br></div></div>
               {% for i in range(0,TaskCount) %}
+                {% if TBData.TaskConnect.TaskAssignedUser[i] == "Not Assigned" %}
+                <div class="row" style="background:red;color:white;padding:3px;border-radius:10px;">
+                {% else %}
                 <div class="row">
+                {% endif %}
                   <div class="col-sm-2">
                     {{ TBData.TaskConnect.TaskTitle[i] }}
                   </div>
@@ -413,7 +425,7 @@
               </div>
             </div>
           </div>
-    <!-- Change Task Status Modal Code Ends Here -->
+    <!-- Assign User To Task Modal Code Ends Here -->
 
   </body>
 </html>

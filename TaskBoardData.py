@@ -152,6 +152,26 @@ class TaskBoardData(webapp2.RequestHandler):
             else:
                 self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=TaskCompleteStatusNotChanged')
 
+# Below code is to handle Assign Task Modal.
+        elif self.request.get('SubmitButton') == 'Assign':
+            TaskTitle = self.request.get('TaskTitleTextBox')
+            SelectionOfUser = self.request.get('SelectToAssignUser')
+            TB_DB_Data = ndb.Key('TaskBoardDB', TaskBoard_ID).get()
+            Task_DB_Data = ndb.Key('TaskDB', TaskBoard_ID).get()
+            ListNumber = 0
+            for i in range(0, len(Task_DB_Data.TaskTitle)):
+                if Task_DB_Data.TaskTitle[i] == TaskTitle:
+                    ListNumber = i
+                    break
+            if Task_DB_Data.TaskAssignedUser[i] == 'Not Assigned':
+                Task_DB_Data.TaskAssignedUser[i] = SelectionOfUser
+                Task_DB_Data.put()
+                TB_DB_Data.TaskConnect = Task_DB_Data
+                TB_DB_Data.put()
+                self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserAssignedToTaskSuccessfully')
+            else:
+                self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserAlreadyAssignedForThisTask')
+
 # In case no condition from above satisfies, below redirects user to home page.
         else:
             self.redirect('/')
