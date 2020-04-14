@@ -91,6 +91,7 @@ class TaskBoardData(webapp2.RequestHandler):
 # Below if condition is to remove user from taskboard.
         elif self.request.get('SubmitButton') == 'Remove':
             TB_DB_Data = ndb.Key('TaskBoardDB',TaskBoard_ID).get()
+            Task_DB_Data = ndb.Key('TaskDB',TaskBoard_ID).get()
             FetchUserEmail = self.request.get('SelectToRemoveUser')
             user_DB_Data = UserDB.query(UserDB.user_Email == FetchUserEmail).get()
             if userLoggedIn.email() == TB_DB_Data.Admin_Email:
@@ -108,6 +109,13 @@ class TaskBoardData(webapp2.RequestHandler):
                         TB_DB_Match_Found = 1
                         position_TB_DB = j
                         break
+                if Task_DB_Data != None:
+                    for k in range(0,len(Task_DB_Data.TaskAssignedUser)):
+                        if Task_DB_Data.TaskAssignedUser[k] == FetchUserEmail:
+                            Task_DB_Data.TaskAssignedUser[k] = "Not Assigned"
+                            Task_DB_Data.put()
+                            TB_DB_Data.TaskConnect.TaskAssignedUser[k] = "Not Assigned"
+                            TB_DB_Data.put()
                 if UDB_Match_Found == 1:
                     del user_DB_Data.TB_Key[position_UDB]
                     user_DB_Data.put()
@@ -205,6 +213,32 @@ class TaskBoardData(webapp2.RequestHandler):
                 self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserAssignedToTaskSuccessfully')
             else:
                 self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserAlreadyAssignedForThisTask')
+
+# If no condition matches, user will be redirected to home page.
+        elif self.request.get('SubmitButton') == 'Delete':
+            User_DB_Data = ndb.Key('UserDB', userLoggedIn.user_id()).get()
+            TB_DB_Data = ndb.Key('TaskBoardDB', TaskBoard_ID).get()
+            if TB_DB_Data.TaskConnect == None:
+                if len(TB_DB_Data.Users_Email) == 1:
+                    if TB_DB_Data.Users_Email[0] == userLoggedIn.email():
+                        for i in range(0, len(User_DB_Data.TB_Key)):
+                            if User_DB_Data.TB_Key[i] == TaskBoard_ID:
+                                del TB_DB_Data.TBName
+                                del TB_DB_Data.Admin_Email
+                                del TB_DB_Data.Users_Email
+                                del TB_DB_Data.TaskConnect
+                                TB_DB_Data.put()
+                                del User_DB_Data.TB_Key[i]
+                                User_DB_Data.put()
+                                self.redirect('/')
+                            else:
+                                self.response.write('There was some error while deleting task board.')
+                    else:
+                        self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserNotAdmin')
+                else:
+                    self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UsersStillAssigned')
+            else:
+                self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=TaskStillExist')
 
 # If no condition matches, user will be redirected to home page.
         else:

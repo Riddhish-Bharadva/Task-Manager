@@ -173,6 +173,18 @@
             <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
               Only Admin have authorization to add or remove users from this task board.
             </div>
+          {% elif notification == 'UserNotAdmin' %}
+            <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              Only Admin have authorization to delete this task board.
+            </div>
+          {% elif notification == 'UsersStillAssigned' %}
+            <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              Other users still have access to this task board.
+            </div>
+          {% elif notification == 'TaskStillExist' %}
+            <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              There are few tasks not deleted yet from this task board.
+            </div>
           {% elif notification == 'No Notification' %}
             <div style='background:Yellow;padding:10px;font-size:15px;border-radius:5px;'>
               Notifications for any operations performed will be displayed here.

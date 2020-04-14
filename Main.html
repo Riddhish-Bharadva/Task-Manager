@@ -65,21 +65,81 @@
             You will be able to view already added task boards below. Click on each to view tasks (if any) inside each task board.
           </div>
           <div class="row">
-            <div class="col-sm-2"></div>
-            <div class="col-sm-8">
+            <div class="col-sm-12">
               <div style="border-top:1px solid black;margin-top:10px;padding:0px;padding-bottom:10px;"></div>
+              <br>
             </div>
-            <div class="col-sm-2"></div>
           </div>
           {% if user_TaskBoards %}
-            {% for i in user_TaskBoards %}
+            <b>
+            <div class="row">
+              <div class="col-sm-2">
+                Taskboard Name
+              </div>
+              <div class="col-sm-2">
+                Taskboard Creator?
+              </div>
+              <div class="col-sm-2">
+                Total Tasks
+              </div>
+              <div class="col-sm-2">
+                Active Tasks
+              </div>
+              <div class="col-sm-2">
+                Complete Tasks
+              </div>
+              <div class="col-sm-2">
+                Total Completed Today
+              </div>
+            </div>
             <div class="row">
               <div class="col-sm-12">
-                <center>
-                  <a href="/TaskBoardData?id={{ i.Admin_Email }}{{ i.TBName }}" name="taskBoardLink" id="taskBoardLink">
-                    {{ i.TBName }}
-                  </a>
-                </center>
+                <br>
+              </div>
+            </div>
+            </b>
+            {% for i in range(0,TaskBoard_Count) %}
+            <div class="row">
+              <div class="col-sm-2">
+                <a href="/TaskBoardData?id={{ user_TaskBoards[i].Admin_Email }}{{ user_TaskBoards[i].TBName }}" name="taskBoardLink" id="taskBoardLink">
+                  {{ user_TaskBoards[i].TBName }}
+                </a>
+              </div>
+              <div class="col-sm-2">
+                {% if user_TaskBoards[i].Admin_Email == userLoggedIn.email() %}
+                  Yes
+                {% else %}
+                  No
+                {% endif %}
+              </div>
+              <div class="col-sm-2">
+                {% if user_TaskBoards[i].TaskConnect.TaskTitle %}
+                  {{ Total_Tasks[i] }}
+                {% else %}
+                  0
+                {% endif %}
+              </div>
+              <div class="col-sm-2">
+                {% if user_TaskBoards[i].TaskConnect.TaskTitle %}
+                  {{ Active_Tasks[i] }}
+                {% else %}
+                  0
+                {% endif %}
+              </div>
+              <div class="col-sm-2">
+                {% if user_TaskBoards[i].TaskConnect.TaskTitle %}
+                  {{ Complete_Tasks[i] }}
+                {% else %}
+                  0
+                {% endif %}
+              </div>
+              <div class="col-sm-2">
+                {% if user_TaskBoards[i].TaskConnect.TaskTitle %}
+                  {{ Completed_Today[i] }}
+                {% else %}
+                  0
+                {% endif %}
+
               </div>
             </div>
             <div class="row">
@@ -91,11 +151,9 @@
           {% else %}
             <div class="row">
               <div class="col-sm-12">
-                <center>
-                  <div style="font-size:15px;">
-                    There are no task boards to display. Please create a task board to view here.
-                  </div>
-                </center>
+                <div style="font-size:15px;">
+                  There are no task boards to display. Please create a task board to view here.
+                </div>
               </div>
             </div>
           {% endif %}

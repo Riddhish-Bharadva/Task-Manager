@@ -8,6 +8,7 @@ from TaskBoardDB import TaskBoardDB
 from TaskDB import TaskDB
 from TaskBoardData import TaskBoardData
 from EditTask import EditTask
+from datetime import datetime
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -20,6 +21,12 @@ class Main(webapp2.RequestHandler):
 
         userLoggedIn = users.get_current_user()
         user_TaskBoards = []
+        TaskBoard_Count = 0
+        Total_Tasks = []
+        Active_Tasks = []
+        Complete_Tasks = []
+        Completed_Today = []
+
         if userLoggedIn:
             loginLink = users.create_logout_url(self.request.uri)
             loginStatus = 'Logout'
@@ -31,6 +38,26 @@ class Main(webapp2.RequestHandler):
             TaskBoardKeys = user_Key.TB_Key
             for i in TaskBoardKeys:
                 user_TaskBoards.append(ndb.Key('TaskBoardDB',i).get())
+            TaskBoard_Count = len(TaskBoardKeys)
+            for j in range(0,TaskBoard_Count):
+                Task_DB_Data = ndb.Key('TaskDB',TaskBoardKeys[j]).get()
+                if Task_DB_Data != None:
+                    Total_Tasks.append(len(Task_DB_Data.TaskTitle))
+                    ActiveCount = 0
+                    CompleteToday = 0
+                    for k in range(0,len(Task_DB_Data.TaskCompleteStatus)):
+                        if Task_DB_Data.TaskCompleteStatus[k] == 0:
+                            ActiveCount = ActiveCount + 1
+                        DateTimeToday = datetime.now()
+                        DateToday = DateTimeToday.strftime('%Y-%m-%d')
+                        if Task_DB_Data.TaskCompleteDate[k] == DateToday:
+                            CompleteToday = CompleteToday + 1
+                    Active_Tasks.append(ActiveCount)
+                    Completed_Today.append(CompleteToday)
+                    Complete_Tasks.append(len(Task_DB_Data.TaskTitle) - ActiveCount)
+                else:
+                    Total_Tasks.append(0)
+
         else:
             loginLink = users.create_login_url(self.request.uri)
             loginStatus = 'Login'
@@ -39,7 +66,12 @@ class Main(webapp2.RequestHandler):
             'loginLink' : loginLink,
             'loginStatus' : loginStatus,
             'userLoggedIn' : userLoggedIn,
-            'user_TaskBoards' : user_TaskBoards
+            'user_TaskBoards' : user_TaskBoards,
+            'TaskBoard_Count' : TaskBoard_Count,
+            'Total_Tasks' : Total_Tasks,
+            'Active_Tasks' : Active_Tasks,
+            'Complete_Tasks' : Complete_Tasks,
+            'Completed_Today' : Completed_Today
         }
         template = JINJA_ENVIRONMENT.get_template('Main.html')
         self.response.write(template.render(template_values))
@@ -71,15 +103,12 @@ class Main(webapp2.RequestHandler):
             user_DB_Data.put()
             TBDB_Reference = ndb.Key('TaskBoardDB',TB_Key_String)
             TBDB_Reference = TBDB_Reference.get()
-            if TBDB_Reference != None:
-                self.redirect('/')
-            else:
-                TBDB_Reference = TaskBoardDB(id=TB_Key_String)
-                TBDB_Reference.TBName = New_TBName
-                TBDB_Reference.Admin_Email = userLoggedIn.email()
-                TBDB_Reference.Users_Email.append(userLoggedIn.email())
-                TBDB_Reference.put()
-                self.redirect('/')
+            TBDB_Reference = TaskBoardDB(id=TB_Key_String)
+            TBDB_Reference.TBName = New_TBName
+            TBDB_Reference.Admin_Email = userLoggedIn.email()
+            TBDB_Reference.Users_Email.append(userLoggedIn.email())
+            TBDB_Reference.put()
+            self.redirect('/')
         else:
             self.redirect('/')
 
