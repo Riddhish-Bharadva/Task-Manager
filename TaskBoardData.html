@@ -185,6 +185,14 @@
             <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
               There are few tasks not deleted yet from this task board.
             </div>
+          {% elif notification == 'TaskBoardNameExist' %}
+            <div style='background:Red;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              Cannot rename taskboard as a taskboard with given name already exist.
+            </div>
+          {% elif notification == 'TaskBoardNameChangedSuccessfully' %}
+            <div style='background:Green;color:white;padding:10px;font-size:15px;border-radius:5px;'>
+              Taskboard name changed successfully.
+            </div>
           {% elif notification == 'No Notification' %}
             <div style='background:Yellow;padding:10px;font-size:15px;border-radius:5px;'>
               Notifications for any operations performed will be displayed here.

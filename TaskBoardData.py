@@ -137,7 +137,7 @@ class TaskBoardData(webapp2.RequestHandler):
         elif self.request.get('SubmitButton') == 'Create Task':
             NewTaskTitle = self.request.get('NewTaskTitle')
             TaskDueDate = self.request.get('TaskDueDate')
-            TaskDueDate = datetime.strptime(TaskDueDate,'%Y-%m-%d')
+            #TaskDueDate = datetime.strptime(TaskDueDate,'%Y-%m-%d')
             Task_DB_Data = ndb.Key('TaskDB', TaskBoard_ID).get()
             Match_Found = 0
             if Task_DB_Data != None:
@@ -227,7 +227,7 @@ class TaskBoardData(webapp2.RequestHandler):
                 if TB_DB_Data.TaskConnect == None:
                     if len(TB_DB_Data.Users_Email) == 1:
                         if TB_DB_Data.Users_Email[0] == userLoggedIn.email():
-                            for i in range(0, len(User_DB_Data.TB_Key)):
+                            for i in range(0,len(User_DB_Data.TB_Key)):
                                 if User_DB_Data.TB_Key[i] == TaskBoard_ID:
                                     del TB_DB_Data.TBName
                                     del TB_DB_Data.Admin_Email
@@ -237,9 +237,8 @@ class TaskBoardData(webapp2.RequestHandler):
                                     TB_DB_Data.key.delete()
                                     del User_DB_Data.TB_Key[i]
                                     User_DB_Data.put()
-                                    self.redirect('/')
-                                else:
-                                    self.response.write('There was some error while deleting task board.')
+                                    break
+                            self.redirect('/')
                         else:
                             self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserNotAdmin')
                     else:
@@ -257,7 +256,61 @@ class TaskBoardData(webapp2.RequestHandler):
 # Below Code handles taskboard rename functionality.
         elif self.request.get('SubmitButton') == 'Update':
             NewTaskBoardName = self.request.get('NewTaskBoardTitle')
-            
+            Task_DB_Data = ndb.Key('TaskDB', TaskBoard_ID).get()
+            self.response.write(Task_DB_Data)
+            self.response.write('<br>')
+            TB_DB_Data = ndb.Key('TaskBoardDB', TaskBoard_ID).get()
+
+            New_TaskBoard_ID = TB_DB_Data.Admin_Email+""+NewTaskBoardName
+            New_TB_DB_Data = ndb.Key('TaskBoardDB', New_TaskBoard_ID).get()
+            if New_TB_DB_Data == None:
+                if Task_DB_Data != None:
+                    New_Task_Connection = TaskDB(id=New_TaskBoard_ID)
+                    New_Task_Connection.TaskTitle = Task_DB_Data.TaskTitle
+                    New_Task_Connection.TaskDueDate = Task_DB_Data.TaskDueDate
+                    New_Task_Connection.TaskAssignedUser = Task_DB_Data.TaskAssignedUser
+                    New_Task_Connection.TaskCompleteStatus = Task_DB_Data.TaskCompleteStatus
+                    New_Task_Connection.TaskCompleteDate = Task_DB_Data.TaskCompleteDate
+                    New_Task_Connection.TaskCompleteTime = Task_DB_Data.TaskCompleteTime
+                    New_Task_Connection.put()
+                    self.response.write('Now displaying new task connection.')
+                    self.response.write('<br>')
+                    self.response.write(New_Task_Connection)
+                New_TB_Connection = TaskBoardDB(id=New_TaskBoard_ID)
+                New_TB_Connection.TBName = NewTaskBoardName
+                New_TB_Connection.Admin_Email = TB_DB_Data.Admin_Email
+                New_TB_Connection.Users_Email = TB_DB_Data.Users_Email
+                if TB_DB_Data.TaskConnect != None:
+                    New_TB_Connection.TaskConnect = New_Task_Connection
+                New_TB_Connection.put()
+                self.response.write('<br>')
+                self.response.write('Now displaying new tb connection.')
+                self.response.write('<br>')
+                self.response.write(New_TB_Connection)
+                UsersToUpdate = New_TB_Connection.Users_Email
+                self.response.write('<br>')
+                self.response.write('Now displaying users to update.')
+                self.response.write('<br>')
+                self.response.write(UsersToUpdate)
+                for i in UsersToUpdate:
+                    User_DB_Data = UserDB.query(UserDB.user_Email == i).get()
+                    self.response.write('Now displaying user Db.')
+                    self.response.write(User_DB_Data)
+                    self.response.write('<br>')
+                    for j in range(0,len(User_DB_Data.TB_Key)):
+                        if User_DB_Data.TB_Key[j] == TaskBoard_ID:
+                            User_DB_Data.TB_Key[j] = New_TaskBoard_ID
+                            User_DB_Data.put()
+                            self.response.write('Displaying Again')
+                            self.response.write(User_DB_Data)
+                            self.response.write('<br>')
+                TB_DB_Data.key.delete()
+                if Task_DB_Data != None:
+                    Task_DB_Data.key.delete()
+                TaskBoard_ID = New_TaskBoard_ID
+                self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=TaskBoardNameChangedSuccessfully')
+            else:
+                self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=TaskBoardNameExist')
 
 # If no condition matches, user will be redirected to home page.
         else:
