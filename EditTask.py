@@ -65,7 +65,7 @@ class EditTask(webapp2.RequestHandler):
 
         New_TaskTitle = self.request.get('TaskTitleTB')
         New_TaskDueDate = self.request.get('TaskDueDate')
-        #New_TaskDueDate = datetime.strptime(New_TaskDueDate,'%Y-%m-%d')
+        New_TaskDueDate = datetime.strptime(New_TaskDueDate,'%Y-%m-%d')
         New_AssignUser = self.request.get('SelectToAssignUser')
 
         TB_DB_Data = ndb.Key('TaskBoardDB',TaskBoard_ID).get()

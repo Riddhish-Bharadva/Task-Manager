@@ -137,7 +137,7 @@ class TaskBoardData(webapp2.RequestHandler):
         elif self.request.get('SubmitButton') == 'Create Task':
             NewTaskTitle = self.request.get('NewTaskTitle')
             TaskDueDate = self.request.get('TaskDueDate')
-            #TaskDueDate = datetime.strptime(TaskDueDate,'%Y-%m-%d')
+            TaskDueDate = datetime.strptime(TaskDueDate,'%Y-%m-%d')
             Task_DB_Data = ndb.Key('TaskDB', TaskBoard_ID).get()
             Match_Found = 0
             if Task_DB_Data != None:
