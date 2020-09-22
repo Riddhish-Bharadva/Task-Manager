@@ -16,22 +16,20 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 class TaskBoardData(webapp2.RequestHandler):
     def get(self):
         self.response.headers['content-type'] = 'text/html'
-
-        userLoggedIn = users.get_current_user()
-        TaskBoard_ID = self.request.get('id')
+        # Declaration of required variables starts here.
         TaskCount = 0
         notification = ''
         EditMode = ''
+        TBData = ''
+        AllUser_Email = ''
+        # Declaration of required variables ends here.
 
+        userLoggedIn = users.get_current_user()
+        TaskBoard_ID = self.request.get('id')
         if userLoggedIn:
             loginLink = users.create_logout_url(self.request.uri)
             loginStatus = 'Logout'
-            user_Key_Fetch = ndb.Key('UserDB', userLoggedIn.user_id())
-            user_Key = user_Key_Fetch.get()
-            if user_Key == None:
-                user_Key = UserDB(id=userLoggedIn.user_id())
-                user_Key.user_Email = userLoggedIn.email()
-                user_Key.put()
+            user_Key = ndb.Key('UserDB', userLoggedIn.email()).get()
             TBData = ndb.Key('TaskBoardDB',TaskBoard_ID).get()
             TaskData = ndb.Key('TaskDB', TaskBoard_ID).get()
             if TaskData != None:
@@ -41,13 +39,11 @@ class TaskBoardData(webapp2.RequestHandler):
             if notification == '':
                 notification = 'No Notification'
             EditMode = self.request.get('EditMode')
-            if EditMode == '':
+            if EditMode == '': # Here by default, edit mode will be off when user is directed to this page from Main.html page or EditTask.html page.
                 EditMode = 'Off'
         else:
             loginLink = users.create_login_url(self.request.uri)
             loginStatus = 'Login'
-            TBData = ''
-            AllUser_Email = ''
             self.redirect('/')
 
         template_values = {
@@ -73,7 +69,7 @@ class TaskBoardData(webapp2.RequestHandler):
         if self.request.get('SubmitButton') == 'Invite':
             TB_DB_Data = ndb.Key('TaskBoardDB',TaskBoard_ID).get()
             FetchUserEmail = self.request.get('SelectToInviteUser')
-            user_DB_Data = UserDB.query(UserDB.user_Email == FetchUserEmail).get()
+            user_DB_Data = ndb.Key('UserDB',FetchUserEmail).get()
             if userLoggedIn.email() == TB_DB_Data.Admin_Email:
                 Match_Found = 0
                 for i in user_DB_Data.TB_Key:
@@ -98,7 +94,7 @@ class TaskBoardData(webapp2.RequestHandler):
             TB_DB_Data = ndb.Key('TaskBoardDB',TaskBoard_ID).get()
             Task_DB_Data = ndb.Key('TaskDB',TaskBoard_ID).get()
             FetchUserEmail = self.request.get('SelectToRemoveUser')
-            user_DB_Data = UserDB.query(UserDB.user_Email == FetchUserEmail).get()
+            user_DB_Data = ndb.Key('UserDB',FetchUserEmail).get()
             if userLoggedIn.email() == TB_DB_Data.Admin_Email:
                 UDB_Match_Found = 0
                 TB_DB_Match_Found = 0
@@ -180,6 +176,7 @@ class TaskBoardData(webapp2.RequestHandler):
             DateTimeToday = datetime.now()
             DateToday = DateTimeToday.strftime('%Y-%m-%d')
             TimeToday = DateTimeToday.strftime("%X")
+            # Below code checks if task is complete or not. In case task is complete, it will change status to incomplete.
             if Task_DB_Data.TaskCompleteStatus[i] == 0:
                 Task_DB_Data.TaskCompleteStatus[i] = 1
                 Task_DB_Data.TaskCompleteDate[i] = DateToday
@@ -188,6 +185,7 @@ class TaskBoardData(webapp2.RequestHandler):
                 TB_DB_Data.TaskConnect = Task_DB_Data
                 TB_DB_Data.put()
                 self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=TaskCompleteStatusChangedToComplete')
+            # Else if task is incomplete, it will change status to complete.
             elif Task_DB_Data.TaskCompleteStatus[i] == 1:
                 Task_DB_Data.TaskCompleteStatus[i] = 0
                 Task_DB_Data.TaskCompleteDate[i] = 'NA'
@@ -221,26 +219,23 @@ class TaskBoardData(webapp2.RequestHandler):
 
 # Below code handles TaskBoard Delete Functionality.
         elif self.request.get('SubmitButton') == 'Delete':
-            User_DB_Data = ndb.Key('UserDB', userLoggedIn.user_id()).get()
+            User_DB_Data = ndb.Key('UserDB', userLoggedIn.email()).get()
             TB_DB_Data = ndb.Key('TaskBoardDB', TaskBoard_ID).get()
-            if TB_DB_Data.Admin_Email == userLoggedIn.email():
-                if TB_DB_Data.TaskConnect == None:
-                    if len(TB_DB_Data.Users_Email) == 1:
-                        if TB_DB_Data.Users_Email[0] == userLoggedIn.email():
-                            for i in range(0,len(User_DB_Data.TB_Key)):
-                                if User_DB_Data.TB_Key[i] == TaskBoard_ID:
-                                    del TB_DB_Data.TBName
-                                    del TB_DB_Data.Admin_Email
-                                    del TB_DB_Data.Users_Email
-                                    del TB_DB_Data.TaskConnect
-                                    TB_DB_Data.put()
-                                    TB_DB_Data.key.delete()
-                                    del User_DB_Data.TB_Key[i]
-                                    User_DB_Data.put()
-                                    break
-                            self.redirect('/')
-                        else:
-                            self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UserNotAdmin')
+            if TB_DB_Data.Admin_Email == userLoggedIn.email(): # Checking if user who is trying to delete taskboard is admin or not?
+                if TB_DB_Data.TaskConnect == None: # Checking if all tasks of this taskboard are deleted or not.
+                    if len(TB_DB_Data.Users_Email) == 1: # Checking if none of other users are having access to taskboard.
+                        for i in range(0,len(User_DB_Data.TB_Key)):
+                            if User_DB_Data.TB_Key[i] == TaskBoard_ID:
+                                del TB_DB_Data.TBName
+                                del TB_DB_Data.Admin_Email
+                                del TB_DB_Data.Users_Email
+                                del TB_DB_Data.TaskConnect
+                                TB_DB_Data.put()
+                                TB_DB_Data.key.delete()
+                                del User_DB_Data.TB_Key[i]
+                                User_DB_Data.put()
+                                break
+                        self.redirect('/')
                     else:
                         self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=UsersStillAssigned')
                 else:
@@ -250,7 +245,7 @@ class TaskBoardData(webapp2.RequestHandler):
 
 # Below code handles taskboard edit functionality.
         elif self.request.get('SubmitButton') == 'Edit':
-            EditMode = 'On'
+            EditMode = 'On' # When user clicks on Edit button on frontend, set EditMode to On and pass in URL.
             self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&EditMode='+EditMode)
 
 # Below Code handles taskboard rename functionality.
@@ -263,7 +258,9 @@ class TaskBoardData(webapp2.RequestHandler):
 
             New_TaskBoard_ID = TB_DB_Data.Admin_Email+""+NewTaskBoardName
             New_TB_DB_Data = ndb.Key('TaskBoardDB', New_TaskBoard_ID).get()
+            # In case there are no taskboards for same user with new name, proceed to rename taskboard.
             if New_TB_DB_Data == None:
+                # In case there were tasks in old taskboard, assign it to taskboard with new name.
                 if Task_DB_Data != None:
                     New_Task_Connection = TaskDB(id=New_TaskBoard_ID)
                     New_Task_Connection.TaskTitle = Task_DB_Data.TaskTitle
@@ -292,8 +289,9 @@ class TaskBoardData(webapp2.RequestHandler):
                 self.response.write('Now displaying users to update.')
                 self.response.write('<br>')
                 self.response.write(UsersToUpdate)
+                # In below loop, update name of taskboard renamed above in list of all users having access to that taskboard.
                 for i in UsersToUpdate:
-                    User_DB_Data = UserDB.query(UserDB.user_Email == i).get()
+                    User_DB_Data = ndb.Key('UserDB',i).get()
                     self.response.write('Now displaying user Db.')
                     self.response.write(User_DB_Data)
                     self.response.write('<br>')
@@ -304,10 +302,10 @@ class TaskBoardData(webapp2.RequestHandler):
                             self.response.write('Displaying Again')
                             self.response.write(User_DB_Data)
                             self.response.write('<br>')
-                TB_DB_Data.key.delete()
+                TB_DB_Data.key.delete() # Deleting data of taskboard with old name.
                 if Task_DB_Data != None:
-                    Task_DB_Data.key.delete()
-                TaskBoard_ID = New_TaskBoard_ID
+                    Task_DB_Data.key.delete() # Deleting data of Tasks in taskboard with old name.
+                TaskBoard_ID = New_TaskBoard_ID # Assigning taskboard's new name to variable and passing in URL as below.
                 self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=TaskBoardNameChangedSuccessfully')
             else:
                 self.redirect('/TaskBoardData?id='+TaskBoard_ID+'&notification=TaskBoardNameExist')

@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>Cloud Computing</title>
+    <title>Task Manager</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
@@ -15,7 +15,7 @@
        max-width:500px;
        justify-content:center;
        border-radius:10px;
-       margin-top:15%;
+       margin-top:20%;
     }
     .LoginButton
     {
@@ -24,6 +24,11 @@
       background:#BDBEB8;
       border-radius:10px;
       justify-content: center;
+    }
+    .LoginButton:hover
+    {
+      color:white;
+      background:#17C6E9 !important;
     }
     .navbar
     {
@@ -44,11 +49,12 @@
                   <span class="icon-bar"></span>
                   <span class="icon-bar"></span>
                 </button>
-                <a class="navbar-brand" href="/">Cloud Computing Assignment 2</a>
+                <a class="navbar-brand" href="/">Task Manager</a>
               </div>
               <div class="collapse navbar-collapse" id="myNavbar">
                 <ul class="nav navbar-nav">
                   <li><a href="" data-toggle="modal" data-target="#NewTaskBoardModal">Create Task Board</a></li>
+                  <li><a href="" data-toggle="modal" data-target="#DeleteAccountModal">Delete Account</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                   <li><a href="{{ loginLink }}"><span class="glyphicon glyphicon-log-in"></span> {{ loginStatus }}</a></li>
@@ -179,7 +185,7 @@
                 <div class="row">
                   <div class="col-sm-4"></div>
                   <div class="col-sm-2">
-                    <input type='submit' class="btn btn-default" name='CreateTaskBoardButton' id='CreateTaskBoardButton' value='Create'>
+                    <input type='submit' class="btn btn-default" name='submitButton' id='CreateTaskBoardButton' value='Create'>
                   </div>
                   <div class="col-sm-2">
                     <input type="reset" class="btn btn-default" value="Reset">
@@ -192,6 +198,43 @@
         </div>
       </div>
 <!-- Create Task Board Modal Code Ends Here -->
+
+<!-- Delete Account Modal Code Starts Here -->
+      <div name="DeleteAccountModal" id="DeleteAccountModal" style="margin-top:10%;" class="modal fade" role="dialog">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+              <h4 class="modal-title">Delete Account</h4>
+            </div>
+            <div class="modal-body">
+              <form action="/" method="post">
+                <div class="row">
+                  <div class="col-sm-12">
+                    <center>
+                      Are you sure you want to proceed deleting your account?
+                    </center>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-12"><br></div>
+                </div>
+                <div class="row">
+                  <div class="col-sm-4"></div>
+                  <div class="col-sm-2">
+                    <input type='submit' class="btn btn-default" name='submitButton' id='DeleteAccountButton' value='Proceed'>
+                  </div>
+                  <div class="col-sm-2">
+                    <input type="submit" class="btn btn-default" data-dismiss="modal" value="Go Back">
+                  </div>
+                  <div class="col-sm-4"></div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+<!-- Delete Account Modal Code Ends Here -->
 
     </center>
   </body>
